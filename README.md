@@ -34,7 +34,7 @@ Kurulum istemiyorsan `Portable.zip`'i aç, içindeki exe'yi çalıştır.
 
 Üstte sürücüyü seç, sonra dört sekmeden birine geç (**Ctrl+1…4**).
 
-1. **Disk haritası.** **Diski tara** sürücüdeki bütün klasörleri ölçer (500 GB'lık bir SSD yaklaşık bir dakika; diske hiçbir şey yazılmaz). Klasörler büyükten küçüğe sıralanır, renkli çubuk bu klasörün neyle dolduğunu gösterir. Çift tıklayıp içine gir, **Geri** tuşuyla dön. Sağda sürücüdeki en büyük 300 dosya listelenir: unutulmuş ekran kayıtları, kurulum dosyaları, sanal diskler…
+1. **Disk haritası.** **Diski tara** sürücüdeki bütün klasörleri ölçer (500 GB'lık bir SSD 15–50 saniye; diske hiçbir şey yazılmaz). Klasörler büyükten küçüğe sıralanır, renkli çubuk bu klasörün neyle dolduğunu gösterir. Çift tıklayıp içine gir, **Geri** tuşuyla dön. Sağda sürücüdeki en büyük 300 dosya listelenir: unutulmuş ekran kayıtları, kurulum dosyaları, sanal diskler…
 2. **Temizlik.** Diski sessizce dolduran önbellekleri ve geçici dosyaları ölçer. Her seçeneğin risk etiketi vardır:
    - 🟢 **Güvenli** (seçili gelir): Temp, çökme dökümleri, Windows Update indirmeleri, tarayıcı ve uygulama önbellekleri, pip/uv/npm/NuGet önbellekleri, NeoStack'in eski sürümleri, Unreal çökme raporları ve log'ları.
    - 🟡 **Küçük yan etki**: ekran kartı shader önbellekleri (ilk açılışta kısa takılma), Unreal önbellekleri (shader'lar yeniden derlenir), Geri Dönüşüm Kutusu, hazırda bekletme dosyası.
@@ -99,7 +99,7 @@ Ayarlar `%AppData%\BrokenSpaceFinder` klasöründe tutulur.
 
 **Use:** pick the drive, then one of the four tabs (**Ctrl+1…4**):
 
-1. **Disk map** – measures every folder on the drive (about a minute for a 500 GB SSD; nothing is written). Double-click to go inside, Backspace to go back. The 300 largest files are listed on the right.
+1. **Disk map** – measures every folder on the drive (15–50 seconds for a 500 GB SSD; nothing is written). Double-click to go inside, Backspace to go back. The 300 largest files are listed on the right.
 2. **Clean up** – temporary files and caches, each with a risk label: 🟢 *Safe* (selected by default), 🟡 *Minor side effect*, 🔴 *Careful* (your own files). Items whose program is running are skipped. Right-click → *What will be deleted?* lists everything first.
 3. **App data** – every folder in AppData and your home folder with its size and the date of its newest file. Folders unchanged for 90+ days are flagged; most are left over from removed programs.
 4. **Programs** – each installed program's size and when it was last opened (from Windows' UserAssist and Prefetch records). *Uninstall…* starts the program's own uninstaller.

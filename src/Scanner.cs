@@ -8,8 +8,10 @@ namespace BrokenSpaceFinder
 {
     class DirNode
     {
-        public string Name = "", Path = "";
+        public string Name = "";
         public DirNode Parent;
+        // Yol saklanmaz, üst klasörlerden üretilir: 200 binden fazla klasörde onlarca MB tasarruf
+        public string Path { get { return Parent == null ? Name : System.IO.Path.Combine(Parent.Path, Name); } }
         public long Size, Own;          // Own: sadece bu klasördeki dosyalar
         public int OwnFiles;
         public long AllFiles;
@@ -39,54 +41,69 @@ namespace BrokenSpaceFinder
         readonly List<BigFile> big = new List<BigFile>();
         long bigMin = 50L << 20;
 
+        static readonly List<DirNode> NoKids = new List<DirNode>(0);
+        static readonly int Threads = Math.Max(4, Math.Min(16, Environment.ProcessorCount * 2));
+        [ThreadStatic] static List<FsEntry> scratch;
+
         public DirNode Scan(string root)
         {
             var n = new DirNode();
             n.Name = root;
-            n.Path = root;
-            Walk(n, 0);
+            Walk(n, root, 0);
             return n;
         }
 
-        void Walk(DirNode n, int depth)
+        void Walk(DirNode n, string path, int depth)
         {
             if (stop) return;
-            if (depth <= 2) Current = n.Path;
-            bool ok;
-            var entries = Native.List(n.Path, out ok);
-            if (!ok) n.Denied = true;
+            if (depth <= 2) Current = path;
+            var entries = scratch ?? (scratch = new List<FsEntry>(256));
+            entries.Clear();
+            if (!Native.Read(path, entries)) n.Denied = true;
 
-            var kids = new List<DirNode>();
-            foreach (var e in entries)
+            List<DirNode> kids = null;
+            List<string> kidPaths = null;
+            long bytes = 0, newest = 0;
+            int files = 0;
+            for (int i = 0; i < entries.Count; i++)
             {
+                var e = entries[i];
                 if (e.IsDir)
                 {
                     if (e.IsLink) continue;   // bağlantı klasörleri başka yeri gösterir; saymak boyutu iki kez sayar
                     var k = new DirNode();
                     k.Name = e.Name;
-                    k.Path = System.IO.Path.Combine(n.Path, e.Name);
                     k.Parent = n;
+                    if (kids == null) { kids = new List<DirNode>(); kidPaths = new List<string>(); }
                     kids.Add(k);
+                    kidPaths.Add(System.IO.Path.Combine(path, e.Name));
                 }
                 else
                 {
-                    n.Own += e.Size;
-                    n.OwnFiles++;
-                    if (e.Written > n.Newest) n.Newest = e.Written;
-                    Interlocked.Increment(ref FilesSeen);
-                    Interlocked.Add(ref BytesSeen, e.Size);
-                    if (e.Size >= bigMin) AddBig(n.Path, e);
+                    bytes += e.Size;
+                    files++;
+                    if (e.Time > newest) newest = e.Time;
+                    if (e.Size >= bigMin) AddBig(path, e);
                 }
             }
+            entries.Clear();   // alt klasörler aynı listeyi kullanır
+            n.Own = bytes;
+            n.OwnFiles = files;
+            n.Newest = Native.Local(newest);
+            Interlocked.Add(ref FilesSeen, files);
+            Interlocked.Add(ref BytesSeen, bytes);
 
-            if (depth < 3 && kids.Count > 1)
+            if (kids == null) { n.Kids = NoKids; n.Size = n.Own; n.AllFiles = n.OwnFiles; return; }
+            kids.TrimExcess();
+
+            if (depth < 4 && kids.Count > 1)
             {
                 var po = new ParallelOptions();
-                po.MaxDegreeOfParallelism = 8;
-                Parallel.ForEach(kids, po, k => Walk(k, depth + 1));
+                po.MaxDegreeOfParallelism = Threads;
+                Parallel.For(0, kids.Count, po, i => Walk(kids[i], kidPaths[i], depth + 1));
             }
             else
-                foreach (var k in kids) Walk(k, depth + 1);
+                for (int i = 0; i < kids.Count; i++) Walk(kids[i], kidPaths[i], depth + 1);
 
             n.Kids = kids;
             n.Size = n.Own;
