@@ -113,4 +113,6 @@ Ayarlar `%AppData%\BrokenSpaceFinder` klasöründe tutulur.
 
 ![Broken Space Finder](docs/images/screenshot-en.png)
 
+**[Code signing policy](SECURITY.md#code-signing-policy)** · Free code signing by SignPath Foundation · Kod imzalama politikası
+
 MIT License.
