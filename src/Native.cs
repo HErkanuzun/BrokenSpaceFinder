@@ -10,61 +10,70 @@ namespace BrokenSpaceFinder
         public string Name;
         public bool IsDir, IsLink;
         public long Size;
-        public DateTime Written;
+        public long Time;   // UTC FILETIME, 0 = bilinmiyor; yerel saate çevirmek pahalı, sadece gerekince yapılır
+        public DateTime Written { get { return Native.Local(Time); } }
     }
 
     // Klasörleri FindFirstFileEx ile okur: DirectoryInfo'dan kat kat hızlıdır, milyonlarca dosyada da az bellek harcar.
     static class Native
     {
-        [StructLayout(LayoutKind.Sequential, Pack = 4, CharSet = CharSet.Unicode)]
-        struct WIN32_FIND_DATA
-        {
-            public uint Attr;
-            public long Created, Accessed, Written;
-            public uint SizeHigh, SizeLow, Res0, Res1;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)] public string Name;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 14)] public string AltName;
-        }
-
+        // WIN32_FIND_DATAW ham bellekten okunur: dosya başına sadece adın string'i oluşur (kısa ad ve marshal kopyası yok).
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        static extern IntPtr FindFirstFileExW(string path, int infoLevel, out WIN32_FIND_DATA data, int searchOp, IntPtr filter, int flags);
+        static extern IntPtr FindFirstFileExW(string path, int infoLevel, IntPtr data, int searchOp, IntPtr filter, int flags);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-        static extern bool FindNextFileW(IntPtr h, out WIN32_FIND_DATA data);
+        [DllImport("kernel32.dll")]
+        static extern bool FindNextFileW(IntPtr h, IntPtr data);
 
         [DllImport("kernel32.dll")]
         static extern bool FindClose(IntPtr h);
 
         const int FindExInfoBasic = 1, FIND_FIRST_EX_LARGE_FETCH = 2;
         const uint DIRECTORY = 0x10, REPARSE_POINT = 0x400;
+        const int DataSize = 592, OffWritten = 20, OffSizeHigh = 28, OffSizeLow = 32, OffName = 44;
         static readonly long MaxFileTime = DateTime.MaxValue.ToFileTimeUtc();
+
+        [ThreadStatic] static IntPtr buf;
+
+        public static DateTime Local(long fileTime)
+        {
+            return fileTime > 0 ? DateTime.FromFileTimeUtc(fileTime).ToLocalTime() : DateTime.MinValue;
+        }
 
         // Bir klasörün içini listeler. ok=false: okunamadı (izin yok ya da yok).
         public static List<FsEntry> List(string dir, out bool ok)
         {
             var result = new List<FsEntry>();
+            ok = Read(dir, result);
+            return result;
+        }
+
+        // Listeyi verilen listeye ekler (tarayıcı aynı listeyi tekrar kullanır)
+        public static bool Read(string dir, List<FsEntry> into)
+        {
+            if (buf == IntPtr.Zero) buf = Marshal.AllocHGlobal(DataSize);   // iş parçacığı başına bir kez
             string p = dir.StartsWith(@"\\?\") ? dir : @"\\?\" + dir;
             p = p.TrimEnd('\\') + @"\*";
-            WIN32_FIND_DATA f;
-            IntPtr h = FindFirstFileExW(p, FindExInfoBasic, out f, 0, IntPtr.Zero, FIND_FIRST_EX_LARGE_FETCH);
-            if (h == new IntPtr(-1)) { ok = false; return result; }
-            ok = true;
+            IntPtr h = FindFirstFileExW(p, FindExInfoBasic, buf, 0, IntPtr.Zero, FIND_FIRST_EX_LARGE_FETCH);
+            if (h == new IntPtr(-1)) return false;
             try
             {
                 do
                 {
-                    if (f.Name == "." || f.Name == "..") continue;
+                    char c0 = (char)Marshal.ReadInt16(buf, OffName), c1 = (char)Marshal.ReadInt16(buf, OffName + 2);
+                    if (c0 == '.' && (c1 == '\0' || (c1 == '.' && Marshal.ReadInt16(buf, OffName + 4) == 0))) continue;
+                    uint attr = (uint)Marshal.ReadInt32(buf, 0);
                     var e = new FsEntry();
-                    e.Name = f.Name;
-                    e.IsDir = (f.Attr & DIRECTORY) != 0;
-                    e.IsLink = (f.Attr & REPARSE_POINT) != 0;
-                    e.Size = e.IsDir ? 0 : ((long)f.SizeHigh << 32) | f.SizeLow;
-                    e.Written = f.Written > 0 && f.Written < MaxFileTime ? DateTime.FromFileTimeUtc(f.Written).ToLocalTime() : DateTime.MinValue;
-                    result.Add(e);
-                } while (FindNextFileW(h, out f));
+                    e.Name = Marshal.PtrToStringUni(buf + OffName);
+                    e.IsDir = (attr & DIRECTORY) != 0;
+                    e.IsLink = (attr & REPARSE_POINT) != 0;
+                    if (!e.IsDir) e.Size = ((long)(uint)Marshal.ReadInt32(buf, OffSizeHigh) << 32) | (uint)Marshal.ReadInt32(buf, OffSizeLow);
+                    long w = Marshal.ReadInt64(buf, OffWritten);
+                    e.Time = w > 0 && w < MaxFileTime ? w : 0;
+                    into.Add(e);
+                } while (FindNextFileW(h, buf));
             }
             finally { FindClose(h); }
-            return result;
+            return true;
         }
 
         public static List<FsEntry> List(string dir)

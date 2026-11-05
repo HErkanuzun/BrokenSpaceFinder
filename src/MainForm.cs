@@ -1021,9 +1021,12 @@ namespace BrokenSpaceFinder
             var snapshot = new List<Rule>(rules);
             var t = new Thread(delegate ()
             {
-                foreach (var r in snapshot)
+                // Her seçenek ayrı klasörlere bakar; paralel ölçmek toplam süreyi kısaltır
+                var po = new System.Threading.Tasks.ParallelOptions();
+                po.MaxDegreeOfParallelism = 4;
+                System.Threading.Tasks.Parallel.ForEach(snapshot, po, (r, state) =>
                 {
-                    if (ExitRequested) return;
+                    if (ExitRequested) { state.Stop(); return; }
                     long s = 0;
                     int c = 0;
                     try
@@ -1052,8 +1055,9 @@ namespace BrokenSpaceFinder
                             UpdateCleanInfo();
                         });
                     }
-                    catch { return; }
-                }
+                    catch { state.Stop(); }
+                });
+                if (ExitRequested) return;
                 try
                 {
                     BeginInvoke((MethodInvoker)delegate

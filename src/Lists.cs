@@ -12,7 +12,8 @@ namespace BrokenSpaceFinder
         public string Title = "", Sub = "", Size = "", Right = "", Badge = "";
         public Color Dot = Theme.Accent, BadgeColor = Theme.Sub, TitleColor = Theme.Text;
         public double Bar = -1;            // 0..1: satırın arkasına çizilen boyut payı
-        public bool Checkable, Checked, Locked;
+        public bool Checkable, Checked;
+        public bool Locked = false;   // işaretlenemez (gri kutu)
         public object Tag;
     }
 
