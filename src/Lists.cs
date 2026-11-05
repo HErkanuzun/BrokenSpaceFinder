@@ -266,7 +266,7 @@ namespace BrokenSpaceFinder
             {
                 float ty, th;
                 Thumb(out ty, out th);
-                Theme.Fill(g, new RectangleF(Width - P(10), ty, P(5), th), P(3), dragThumb ? Theme.Sub : Theme.Border);
+                Theme.Fill(g, new RectangleF(Width - P(9), ty, P(4), th), P(2), dragThumb ? Color.FromArgb(150, 120, 225, 212) : Color.FromArgb(48, 255, 255, 255));   // buzlu cam tutamak
             }
         }
     }
