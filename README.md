@@ -13,13 +13,13 @@ Hiçbir şey indirmediğin hâlde SSD'nin neden sürekli dolduğunu gösterir: e
 
 ## Broken ailesi
 
-Windows'ta "bozuk" bir şeyi bulup onunla yaşamanı sağlayan küçük, kurulumsuz araçlar. Hepsi aynı tasarım dilinde, Türkçe/İngilizce, ekstra bir şey kurmadan derlenir.
+Windows'ta bozuk ya da sorunlu bir şeyi bulup onunla yaşamanı sağlayan küçük araçlar. Hepsi aynı tasarım dilinde, ücretsiz ve açık kaynak.
 
 | | |
 |---|---|
 | [Broken Screen Resizer](https://github.com/HErkanuzun/BrokenScreenResizer) | Monitörün bozuk kısmını Windows'un dışında bırakır. |
-| [Broken Disk Resizer](https://github.com/HErkanuzun/BrokenDiskResizer) | Hard diskin bozuk sektörlerini bulur, sağlam kısımları bölümler. |
-| **Broken Space Finder** | Diski kimin doldurduğunu bulur ve güvenle temizler. |
+| [Broken Disk Resizer](https://github.com/HErkanuzun/BrokenDiskResizer) | Hard diskin bozuk sektörlerini bulur, sadece sağlam kısımları bölümler. |
+| **Broken Space Finder** | Diski neyin doldurduğunu bulur ve güvenle temizler. |
 
 ## Kurulum
 
