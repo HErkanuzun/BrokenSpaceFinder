@@ -20,6 +20,7 @@ Windows'ta bozuk ya da sorunlu bir şeyi bulup onunla yaşamanı sağlayan küç
 | [Broken Screen Resizer](https://github.com/HErkanuzun/BrokenScreenResizer) | Monitörün bozuk kısmını Windows'un dışında bırakır. |
 | [Broken Disk Resizer](https://github.com/HErkanuzun/BrokenDiskResizer) | Hard diskin bozuk sektörlerini bulur, sadece sağlam kısımları bölümler. |
 | **Broken Space Finder** | Diski neyin doldurduğunu bulur ve güvenle temizler. |
+| [Broken Microphone](https://github.com/HErkanuzun/BrokenMicrophone) | Telefonu ya da tableti bilgisayarın mikrofonu yapar. |
 | [Broken Hub](https://github.com/HErkanuzun/BrokenHub) | Bütün Broken araçlarını tek yerden kurar, günceller ve açar. |
 
 ## Kurulum
@@ -109,7 +110,7 @@ Ayarlar `%AppData%\BrokenSpaceFinder` klasöründe tutulur.
 
 **Build:** `build.bat` builds the exe with the .NET Framework compiler that ships with Windows. `paketle.bat` also builds the installer, portable ZIP and checksums.
 
-**The Broken family:** [Broken Screen Resizer](https://github.com/HErkanuzun/BrokenScreenResizer) (keeps a monitor's broken area out of use) · [Broken Disk Resizer](https://github.com/HErkanuzun/BrokenDiskResizer) (keeps a disk's bad sectors out of use) · **Broken Space Finder** · [Broken Hub](https://github.com/HErkanuzun/BrokenHub) (installs, updates and opens all the Broken tools from one place).
+**The Broken family:** [Broken Screen Resizer](https://github.com/HErkanuzun/BrokenScreenResizer) (keeps a monitor's broken area out of use) · [Broken Disk Resizer](https://github.com/HErkanuzun/BrokenDiskResizer) (keeps a disk's bad sectors out of use) · **Broken Space Finder** · [Broken Microphone](https://github.com/HErkanuzun/BrokenMicrophone) (turns a phone or tablet into the computer's microphone) · [Broken Hub](https://github.com/HErkanuzun/BrokenHub) (installs, updates and opens all the Broken tools from one place).
 
 ![Broken Space Finder](docs/images/screenshot-en.png)
 
