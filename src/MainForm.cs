@@ -431,7 +431,8 @@ namespace BrokenSpaceFinder
         {
             if (segTab == null || btnAppRemove == null) return;
             int W = page.ClientSize.Width, H = page.ClientSize.Height;
-            int pad = P(24), x = pad, w = W - pad * 2, y = pad, bottom = H - pad;
+            // geniş ekranda içerik en fazla P(1280) genişlikte ve ortada; listeler yüksekliği doldurur
+            int pad = P(24), w = Math.Min(P(1280), W - pad * 2), x = (W - w) / 2, y = pad, bottom = H - pad;
 
             logo.SetBounds(x, y, P(48), P(48));
             lblTitle.Location = new Point(x + P(62), y - P(1));
