@@ -195,10 +195,9 @@ namespace BrokenSpaceFinder
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            var g = Theme.Prep(e, BackColor);
+            var g = Theme.Prep(e, this);
             var r = new RectangleF(0.5f, 0.5f, Width - 1.5f, Height - 1.5f);
-            Theme.Fill(g, r, P(10), Theme.Card);
-            Theme.Stroke(g, r, P(10), Focused ? Theme.Mix(Theme.Border, Theme.Accent, 0.35f) : Theme.Border, 1);
+            Glass.Card(g, r, P(10), Color.Empty);
             if (Items.Count == 0)
             {
                 Theme.Draw(g, Empty, Font, new RectangleF(P(18), P(14), Width - P(36), Height - P(28)), Theme.Sub, StringAlignment.Near, StringAlignment.Near, true);
@@ -295,7 +294,7 @@ namespace BrokenSpaceFinder
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            var g = Theme.Prep(e, BackColor);
+            var g = Theme.Prep(e, this);
             float bh = Theme.P(14);
             var br = new RectangleF(0.5f, 0.5f, Width - 1.5f, bh);
             Theme.Fill(g, br, bh / 2, Theme.Field);

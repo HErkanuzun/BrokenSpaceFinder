@@ -10,8 +10,15 @@ using System.Windows.Forms;
 
 namespace BrokenSpaceFinder
 {
-    class MainForm : Form
+    class MainForm : Form, ISurface
     {
+        readonly TitleBar titleBar = new TitleBar();
+        protected override void WndProc(ref Message m) { if (!Frame.Handle(this, ref m, titleBar.Height)) base.WndProc(ref m); }
+        protected override void OnActivated(EventArgs e) { base.OnActivated(e); titleBar.Invalidate(); }
+        public void PaintSurface(Graphics g, Rectangle r) { Glass.Backdrop(g, ClientSize, Point.Empty, r); }
+        protected override void OnPaintBackground(PaintEventArgs e) { PaintSurface(e.Graphics, e.ClipRectangle); }
+        protected override void OnResize(EventArgs e) { base.OnResize(e); Invalidate(true); }
+        protected override void OnDeactivate(EventArgs e) { base.OnDeactivate(e); titleBar.Invalidate(); }
         readonly Settings cfg;
         readonly BufferedPanel page = new BufferedPanel();
         readonly System.Windows.Forms.Timer tick = new System.Windows.Forms.Timer();
@@ -80,6 +87,8 @@ namespace BrokenSpaceFinder
             page.BackColor = Theme.Bg;
             page.Resize += delegate { DoLayout(); };
             Controls.Add(page);
+            titleBar.Dock = DockStyle.Top;
+            Controls.Add(titleBar);
 
             BuildUi();
             InitialSize();
@@ -91,7 +100,7 @@ namespace BrokenSpaceFinder
 
         static int P(float v) { return Theme.P(v); }
 
-        protected override void OnHandleCreated(EventArgs e) { base.OnHandleCreated(e); Theme.DarkTitle(this); }
+        protected override void OnHandleCreated(EventArgs e) { base.OnHandleCreated(e); Frame.Apply(this); }
 
         protected override void OnLoad(EventArgs e)
         {
@@ -209,7 +218,7 @@ namespace BrokenSpaceFinder
             var l = new Label();
             l.Text = L.Upper(text);
             l.ForeColor = Theme.Sub;
-            l.BackColor = Theme.Bg;
+            l.BackColor = Color.Transparent;
             l.AutoSize = true;
             Add(l);
             l.Font = new Font(Font.FontFamily, 8f, FontStyle.Bold);
@@ -239,7 +248,7 @@ namespace BrokenSpaceFinder
 
             logo = new PictureBox();
             logo.SizeMode = PictureBoxSizeMode.Zoom;
-            logo.BackColor = Theme.Bg;
+            logo.BackColor = Color.Transparent;
             logo.Image = Theme.Logo();
             page.Controls.Add(logo);
 
@@ -302,7 +311,7 @@ namespace BrokenSpaceFinder
             btnUp.Enabled = btnReveal.Enabled = false;   // tarama bitince açılır
             lblPath = Add(new Label());
             lblPath.ForeColor = Theme.Text;
-            lblPath.BackColor = Theme.Bg;
+            lblPath.BackColor = Color.Transparent;
             lblPath.AutoEllipsis = true;
             lblPath.Font = new Font(Font, FontStyle.Bold);
             bar = Add(new SpaceBar());
