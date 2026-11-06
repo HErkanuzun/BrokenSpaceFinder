@@ -13,7 +13,8 @@ namespace BrokenSpaceFinder
     class MainForm : Form, ISurface
     {
         readonly TitleBar titleBar = new TitleBar();
-        protected override void WndProc(ref Message m) { if (!Frame.Handle(this, ref m, titleBar.Height)) base.WndProc(ref m); }
+        readonly AppHeader header = new AppHeader();
+        protected override void WndProc(ref Message m) { if (!Frame.Handle(this, ref m, titleBar.Height + header.Height)) base.WndProc(ref m); }
         protected override void OnActivated(EventArgs e) { base.OnActivated(e); titleBar.Invalidate(); }
         public void PaintSurface(Graphics g, Rectangle r) { Glass.Backdrop(g, ClientSize, Point.Empty, r); }
         protected override void OnPaintBackground(PaintEventArgs e) { PaintSurface(e.Graphics, e.ClipRectangle); }
@@ -87,6 +88,9 @@ namespace BrokenSpaceFinder
             page.BackColor = Theme.Bg;
             page.Resize += delegate { DoLayout(); };
             Controls.Add(page);
+            header.Dock = DockStyle.Top;
+            Controls.Add(header);
+            titleBar.ShowTitle = false;
             titleBar.Dock = DockStyle.Top;
             Controls.Add(titleBar);
 
@@ -436,6 +440,21 @@ namespace BrokenSpaceFinder
         }
 
         // ------------------------------------------------------------------ Yerleşim
+        // logo, ad ve dil/Hakkında düğmeleri sabit başlıkta (sayfayla birlikte oynamaz)
+        void SetupHeader()
+        {
+            header.Logo = logo.Image;
+            header.Title = lblTitle.Text;
+            header.Subtitle = lblSub.Text;
+            header.Font = Font;
+            logo.Visible = lblTitle.Visible = lblSub.Visible = false;
+            header.ClearActions();
+            header.AddAction(btnAbout, P(90));
+            header.AddAction(segLang, P(96));
+            header.AddAction(btnAdmin, P(190));
+            header.Invalidate();
+        }
+
         void DoLayout()
         {
             if (segTab == null || btnAppRemove == null) return;
@@ -443,16 +462,7 @@ namespace BrokenSpaceFinder
             // geniş ekranda içerik en fazla P(1280) genişlikte ve ortada; listeler yüksekliği doldurur
             int pad = P(24), w = Math.Min(P(1280), W - pad * 2), x = (W - w) / 2, y = pad, bottom = H - pad;
 
-            logo.SetBounds(x, y, P(48), P(48));
-            lblTitle.Location = new Point(x + P(62), y - P(1));
-            lblSub.Location = new Point(x + P(64), y + P(30));
-            int bx = x + w;
-            btnAbout.SetBounds(bx - P(90), y + P(6), P(90), P(32));
-            bx -= P(90) + P(8);
-            segLang.SetBounds(bx - P(96), y + P(6), P(96), P(32));
-            bx -= P(96) + P(10);
-            if (btnAdmin.Visible) btnAdmin.SetBounds(bx - P(190), y + P(6), P(190), P(32));
-            y += P(66);
+            if (segLang.Parent != header) SetupHeader();
 
             segDrive.SetBounds(x, y, w, P(40));
             y += P(48);
